@@ -1,0 +1,60 @@
+Install the Pillow library:
+bash
+Copy code
+pip install Pillow
+Code
+python
+Copy code
+from PIL import Image
+import numpy as np
+
+# Encryptor Class
+class SimpleImageEncryptor:
+    def __init__(self, image_path):
+        self.image = Image.open(image_path)
+        self.image_data = np.array(self.image)
+    
+    def encrypt(self, operation="swap", key=1):
+        if operation == "swap":
+            self._swap_pixels()
+        elif operation == "math":
+            self._apply_math_operation(key)
+        return Image.fromarray(self.image_data)
+
+    def decrypt(self, operation="swap", key=1):
+        # Reversing the operations
+        if operation == "swap":
+            self._swap_pixels()  # Swapping again will revert
+        elif operation == "math":
+            self._apply_math_operation(-key)  # Reverse the math operation
+        return Image.fromarray(self.image_data)
+
+    def _swap_pixels(self):
+        """ Swap pixels in the image horizontally. """
+        self.image_data[:, :] = self.image_data[:, ::-1]
+
+    def _apply_math_operation(self, key):
+        """ Apply a simple mathematical operation to pixel values (e.g., add key). """
+        self.image_data = (self.image_data + key) % 256  # Ensure values are in range [0, 255]
+
+    def save_image(self, image, path):
+        image.save(path)
+
+# Example usage
+encryptor = SimpleImageEncryptor("input_image.jpg")
+
+# Encrypting the image using pixel swap
+encrypted_image = encryptor.encrypt(operation="swap")
+encryptor.save_image(encrypted_image, "encrypted_image.jpg")
+
+# Decrypting the image using pixel swap
+decrypted_image = encryptor.decrypt(operation="swap")
+encryptor.save_image(decrypted_image, "decrypted_image.jpg")
+
+# Encrypting using a mathematical operation (e.g., add a key of 10 to each pixel)
+encrypted_math_image = encryptor.encrypt(operation="math", key=10)
+encryptor.save_image(encrypted_math_image, "encrypted_math_image.jpg")
+
+# Decrypting the mathematically encrypted image
+decrypted_math_image = encryptor.decrypt(operation="math", key=10)
+encryptor.save_image(decrypted_math_image, "decrypted_math_image.jpg")
